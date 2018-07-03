@@ -2,8 +2,16 @@ var express = require('express');
 var router = express.Router();
 var User = require('../models/users');
 
+function cekLogin(req, res, next){
+  if(req.isAuthenticated()){
+    return next();
+  } else{
+    res.redirect('/login');
+  }
+}
+
 // GET users listing
-router.get('/', function(req, res, next) {
+router.get('/', cekLogin, function(req, res, next) {
   User.find({}).then(function(result){
     res.render('users', {title: 'User Data', data : result});
   }).catch(next);
@@ -18,7 +26,7 @@ router.get('/:id', function(req, res, next) {
 //Create to MongoDB
 router.post('/', function(req, res, next) {
   User.create(req.body).then(function(result){
-    res.redirect('/api/users');
+    res.send(result);
   }).catch(next);
 });
 
