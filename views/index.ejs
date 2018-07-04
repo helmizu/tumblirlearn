@@ -6,11 +6,20 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>      
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        $(function(){
+            var socket = io();
+            socket.on('event', function(msg){
+                $("#room").append(msg);
+            });
+        });
+    </script>
   </head>
   <body>
   <%- include('header'); %>
   <div class="body">
-      <h1><%= title %></h1>
+      <h1><%= title %></h1> <h3 id="room">Room : </h3>
       <div class="panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">Welcome to <%= title %></h3>
@@ -35,6 +44,94 @@
         </table>
         </div>
        </div>
+
+       <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Socket IO Room</h3>
+            </div>
+            <div class="panel-body">
+            
+                <div class="col-sm-2">
+                <input placeholder="Room" class="form-control" type="text" name="rooms" id="rooms" required>
+                </div>
+                <div class="col-sm-1">
+                <button class="btn btn-primary btn-block" id="join"> Join </button>
+                </div>
+                <div class="col-sm-3">
+                <input placeholder="Name" class="form-control" type="text" name="name" id="name" required>
+                </div>
+                <div class="col-sm-5">
+                <input placeholder="Chat" class="form-control" type="text" name="chat" id="chat" required>
+                </div>
+                <div class="col-sm-1">
+                <button class="btn btn-success btn-block" id="send"> Send </button>
+                </div>
+                <div style="clear:both; padding-top:20px"></div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title text-capitalize text-center">chat room</h3>
+                    </div>
+                    <div class="panel-body">
+                        <ul id="listroom">
+                            
+                        </ul>
+                    </div>
+                </div>
+                <script>
+                    $(function(){
+                        var socketroom = io({transports :['websocket'], upgrade : false});
+                        $('#join').on('click', function(){
+                            socketroom.emit('room join', $('#rooms').val());
+                        });
+                        $('#send').on('click', function(){
+                            socketroom.emit('chat', {room : $('#rooms').val(), name : $('#name').val(), chat : $('#chat').val()});
+                        });
+                        socketroom.on('room event', function(msg){
+                            $('#listroom').append('<li>'+msg+'</li>');
+                        });
+                        socketroom.on('chat', function(msg){
+                            $('#listroom').append('<li>'+msg+'</li>');
+                        })
+                    })
+                </script>
+            </div>
+        </div>
+
+       <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Socket IO Namespace</h3>
+            </div>
+            <div class="panel-body">
+            <button class="btn btn-warning" id="ns1"> Namespace1 </button>
+            <button class="btn btn-danger" id="ns2"> Namespace2 </button>
+            <br>
+
+                <ul id="list1">
+                    
+                </ul>
+                <ul id="list2">
+                    
+                </ul>
+                <script>
+                    $(function(){
+                        var socketns1 = io('/namespace1');
+                        var socketns2 = io('/namespace2');
+                        $('#ns1').click(function(){
+                            socketns1.emit('eventns', "Hello from One");
+                        })
+                        $('#ns2').click(function(){
+                            socketns2.emit('eventns', "Hello from Two");
+                        })
+                        socketns1.on('eventns', function(msg){
+                            $('#list1').append('<li>'+msg+'</li>');
+                        })
+                        socketns2.on('eventns', function(msg){
+                            $('#list2').append('<li>'+msg+'</li>');
+                        })
+                    })
+                </script>
+            </div>
+        </div>
     </div>
   </body>
 </html>

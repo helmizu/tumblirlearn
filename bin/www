@@ -27,7 +27,34 @@ var server = http.createServer(app);
 var socket = require('socket.io');
 var io = socket(server);
 io.on('connection', function(socket){ 
-  console.log('Socket connect with id =', socket.id); 
+  console.log('Socket connect with id =', socket.id);
+  /*
+  var now = Date.now();
+  if (now % 2 == 0){
+    socket.join('even');
+  } else {
+    socket.join('odd');
+  }  
+  io.to('even').emit('event', 'Even Room with number ' + now);
+  io.to('odd').emit('event', 'Odd Room with number ' + now);
+  */
+  socket.on('room join', function(msg){
+    
+    console.log(socket.rooms);
+    Object.keys(socket.rooms).filter((r) => r != socket.id).forEach((r) =>socket.leave(r));
+    
+    setTimeout(() => {
+      socket.join(msg);
+      socket.emit('room event', 'Joined Room ' + msg);
+      socket.broadcast.to(msg).emit('room event', 'Someone Joined Room ' + msg);
+    }, 0);
+  })
+
+  socket.on('chat', function(msg){
+    console.log(msg);
+    io.to(msg.room).emit('room event','<strong>'+ msg.name + '</strong> : ' + msg.chat);
+  })
+
   socket.on('disconnect', function(){
     console.log('user disconnected');
   });
@@ -40,6 +67,26 @@ io.on('connection', function(socket){
     io.emit('delete data', msg);
   });
 });
+
+
+/**
+ * Socket io with Namespace.
+ */
+var namespace1 = io.of('/namespace1');
+var namespace2 = io.of('/namespace2');
+
+function namespacehandler(namespace){
+  return function(socket){
+    socket.emit('eventns', 'You Joined ' + namespace.name);
+    // just resend it
+    socket.on('eventns', function(msg){
+      socket.broadcast.emit('eventns', msg);
+    });
+  };
+}
+
+namespace1.on('connection', namespacehandler(namespace1));
+namespace2.on('connection', namespacehandler(namespace2));
 
 /**
  * Listen on provided port, on all network interfaces.
