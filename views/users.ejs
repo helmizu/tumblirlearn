@@ -7,37 +7,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    <script>
-    $(function () {
-        var socket = io();
-        $('#form').submit(function(){
-            $.ajax({
-            type: "POST",
-            url: "http://localhost:7000/api/users/",
-            data: {
-                name: $("#name").val(),
-                age: $("#age").val()
-            },
-            success: function(result) {
-                var id = result._id;
-                socket.emit('add data', {uid: id, name: $('#name').val(), age: $('#age').val() });
-                $('#name').val('');
-                $('#age').val('');
-            },
-            error : function(result){
-                $("#kolom").html( "<strong>" + JSON.stringify(result) + "</strong>" );
-            }
-        });
-            return false;
-        });
-        socket.on('add data', function(msg){
-            $('#tabledata').append('<tr><td>'+ msg.uid +'</td><td>'+ msg.name +'</td><td>'+ msg.age+'</td><td>'+
-            '<button class="btn btn-default" onclick="editReq(\''+msg.uid+'\')">EDIT DATA</button>'
-            +' <button class="btn btn-danger" onclick="deleteReq(\''+msg.uid+'\')">DELETE</button></td></tr>');
-        });
-    });
-    </script>
-        
+    <script src="/javascripts/manage.js"></script>
   </head>
   <body>
   <%- include('header'); %>
@@ -84,14 +54,14 @@
                 <th>age</th>
                 <th>aksi</th>
             </tr>
-            <% data.forEach(function(user){ %>
-                <tr>
-                    <td><%= user._id %></td>
-                    <td><%= user.name %></td>
-                    <td><%= user.age %></td>
+            <% data.forEach(function(users){ %>
+                <tr id="<%= users._id %>">
+                    <td><%= users._id %></td>
+                    <td><%= users.name %></td>
+                    <td><%= users.age %></td>
                     <td>
-                        <button class="btn btn-default" onclick="editReq('<%= user._id %>')">EDIT DATA</button>
-                        <button class="btn btn-danger" onclick="deleteReq('<%= user._id %>')">DELETE</button>
+                        <button class="btn btn-default" onclick="editReq('<%= users._id %>')">EDIT DATA</button>
+                        <button class="btn btn-danger" onclick="deleteReq('<%= users._id %>')">DELETE</button>
                     </td>
                 </tr>
             <% }); %>
@@ -101,52 +71,5 @@
         <div id="kolom"></div>
     </div>
   </body>
-  <script>
-      $(document).ready(function() {
-          $(document).on('submit', '#editUser', function() {
-              putReq($("#userid").val());
-              return false;
-          });
-      });
-      function putReq(id){
-        $.ajax({
-            type: "PUT",
-            url: "http://localhost:7000/api/users/"+id,
-            data: {
-                name: $("#ename").val(),
-                age: $("#eage").val()
-            },
-            success: function( result ) {
-                $("#kolom").html( "<strong>" + JSON.stringify(result) + "</strong>" );
-                location.reload();
-            },
-            error : function(result){
-                $("#kolom").html( "<strong>" + JSON.stringify(result) + "</strong>" );
-            }
-        });
-      }
-      function deleteReq(id){
-        $.ajax({
-            type: "DELETE",
-            url: "http://localhost:7000/api/users/"+id,
-            success: function( result ) {
-                $("#kolom").html( "<strong>" + JSON.stringify(result) + "</strong>" );
-                location.reload();
-            }
-        });
-      }
-      function editReq(id){
-        $.ajax({
-            type: "GET",
-            url: "http://localhost:7000/api/users/"+id,
-            success: function( result ) {
-                $("#kolom").html( "<strong>" + JSON.stringify(result) + "</strong>" );
-                $("#formEdit").show();
-                $("#userid").val(result._id);
-                $("#ename").val(result.name);
-                $("#eage").val(result.age);
-            }
-        });
-      }
-  </script>
+  <script></script>
 </html>

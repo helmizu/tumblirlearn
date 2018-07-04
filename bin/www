@@ -33,7 +33,11 @@ io.on('connection', function(socket){
   });
   socket.on('add data', function(msg){
     console.log('add data: ' + msg.uid, msg.name, msg.age);
-    io.emit('add data', msg)
+    io.emit('add data', msg);
+  });
+  socket.on('delete data', function(msg){
+    console.log('delete data: ' + msg);
+    io.emit('delete data', msg);
   });
 });
 
