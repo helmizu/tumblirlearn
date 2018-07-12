@@ -19,7 +19,7 @@ var register = require('./routes/register');
 var app = express();
 
 // MongoDB Connection
-mongoose.connect('mongodb://172.30.73.102:27017/user');
+mongoose.connect('mongodb://userAOQ:userAOQ@172.30.73.102:27017/user?');
 mongoose.Promise = global.Promise;
 
 // view engine setup
